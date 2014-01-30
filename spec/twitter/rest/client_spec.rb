@@ -65,52 +65,6 @@ describe Twitter::REST::Client do
     end
   end
 
-  describe '#connection_options=' do
-    it 'sets connection options' do
-      capture_warning do
-        @client.connection_options = 'connection options'
-      end
-      expect(@client.connection_options).to eq('connection options')
-    end
-    it 'outputs a warning' do
-      warning = capture_warning do
-        @client.connection_options = nil
-      end
-      expect(warning).to match(/\[DEPRECATION\] Twitter::REST::Client#connection_options= is deprecated and will be removed in version 6\.0\.0\.$/)
-    end
-  end
-
-  describe '#connection_options' do
-    it 'returns the connection options hash with proxy and user_agent' do
-      client = Twitter::REST::Client.new do |config|
-        config.consumer_key        = 'CK'
-        config.consumer_secret     = 'CS'
-        config.access_token        = 'AT'
-        config.access_token_secret = 'ATS'
-        config.proxy               = 'http://localhost:99'
-        config.user_agent          = 'My Twitter Ruby Gem'
-      end
-
-      expect(client.connection_options[:proxy]).to eql('http://localhost:99')
-      expect(client.connection_options[:headers][:user_agent]).to eql('My Twitter Ruby Gem')
-    end
-  end
-
-  describe '#middleware=' do
-    it 'sets middleware' do
-      capture_warning do
-        @client.middleware = 'middleware'
-      end
-      expect(@client.middleware).to eq 'middleware'
-    end
-    it 'outputs a warning' do
-      warning = capture_warning do
-        @client.middleware = nil
-      end
-      expect(warning).to match(/\[DEPRECATION\] Twitter::REST::Client#middleware= is deprecated and will be removed in version 6\.0\.0\.$/)
-    end
-  end
-
   describe '#credentials?' do
     it 'returns true if all credentials are present' do
       client = Twitter::REST::Client.new(:consumer_key => 'CK', :consumer_secret => 'CS', :access_token => 'AT', :access_token_secret => 'AS')
@@ -119,16 +73,6 @@ describe Twitter::REST::Client do
     it 'returns false if any credentials are missing' do
       client = Twitter::REST::Client.new(:consumer_key => 'CK', :consumer_secret => 'CS', :access_token => 'AT')
       expect(client.credentials?).to be false
-    end
-  end
-
-  describe '#connection' do
-    it 'looks like Faraday connection' do
-      expect(@client.send(:connection)).to respond_to(:run_request)
-    end
-    it 'memoizes the connection' do
-      c1, c2 = @client.send(:connection), @client.send(:connection)
-      expect(c1.object_id).to eq(c2.object_id)
     end
   end
 
@@ -142,22 +86,6 @@ describe Twitter::REST::Client do
       stub_post('/1.1/statuses/update_with_media.json').to_return(:body => fixture('status.json'), :headers => {:content_type => 'application/json; charset=utf-8'})
       @client.update_with_media('Update', fixture('pbjt.gif'))
       expect(a_post('/1.1/statuses/update_with_media.json')).to have_been_made
-    end
-    it 'catches and reraises Faraday timeout errors' do
-      allow(@client).to receive(:connection).and_raise(Faraday::Error::TimeoutError.new('execution expired'))
-      expect { @client.send(:request, :get, '/path') }.to raise_error(Twitter::Error::RequestTimeout)
-    end
-    it 'catches and reraises Timeout errors' do
-      allow(@client).to receive(:connection).and_raise(Timeout::Error.new('execution expired'))
-      expect { @client.send(:request, :get, '/path') }.to raise_error(Twitter::Error::RequestTimeout)
-    end
-    it 'catches and reraises Faraday client errors' do
-      allow(@client).to receive(:connection).and_raise(Faraday::Error::ClientError.new('connection failed'))
-      expect { @client.send(:request, :get, '/path') }.to raise_error(Twitter::Error)
-    end
-    it 'catches and reraises JSON::ParserError errors' do
-      allow(@client).to receive(:connection).and_raise(JSON::ParserError.new('unexpected token'))
-      expect { @client.send(:request, :get, '/path') }.to raise_error(Twitter::Error)
     end
   end
 
@@ -205,13 +133,6 @@ describe Twitter::REST::Client do
       client = Twitter::REST::Client.new(:bearer_token => token)
       authorization = client.send(:bearer_auth_header)
       expect(authorization).to eq('Bearer BT')
-    end
-  end
-
-  describe '#bearer_token_credentials_auth_header' do
-    it 'creates the correct auth header with supplied consumer_key and consumer_secret' do
-      authorization = @client.send(:bearer_token_credentials_auth_header)
-      expect(authorization).to eq('Basic Q0s6Q1M=')
     end
   end
 end

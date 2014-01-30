@@ -15,6 +15,25 @@ module Twitter
       end
     end
 
+  private
+
+    def symbolize_keys(object)
+      if object.is_a?(Array)
+        object.inject([]) do |result, val|
+          result << symbolize_keys(val)
+          result
+        end
+      elsif object.is_a?(Hash)
+        object.inject({}) do |result, (key, val)|
+          new_key = key.respond_to?(:to_sym) ? key.to_sym : key
+          result[new_key] = symbolize_keys(val)
+          result
+        end
+      else
+        object
+      end
+    end
+
     # Returns a new array with the concatenated results of running block once for every element in enumerable.
     # If no block is given, an enumerator is returned instead.
     #

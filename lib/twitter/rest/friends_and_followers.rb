@@ -203,7 +203,7 @@ module Twitter
       # @param target [Integer, String, Twitter::User] The Twitter user ID, screen name, or object of the target user.
       # @param options [Hash] A customizable set of options.
       def friendship?(source, target, options = {})
-        friendship(source, target, options).source.following
+        friendship(source, target, options).source.following?
       end
 
       # Returns a cursored collection of user objects for users following the specified user.
@@ -263,7 +263,7 @@ module Twitter
       # @return [Array<Integer>]
       # @param options [Hash] A customizable set of options.
       def no_retweet_ids(options = {})
-        get('/1.1/friendships/no_retweets/ids.json', options).body.collect(&:to_i)
+        get('/1.1/friendships/no_retweets/ids.json', options).collect(&:to_i)
       end
       alias_method :no_retweets_ids, :no_retweet_ids
     end
