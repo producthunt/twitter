@@ -48,7 +48,7 @@ module Twitter
         response = HTTP.with(headers).send(method, URL_PREFIX + path, params)
         error = error(response)
         fail(error) if error
-        symbolize_keys(response.parse)
+        symbolize_keys!(response.parse)
       end
 
       def error(response)

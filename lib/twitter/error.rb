@@ -42,7 +42,7 @@ module Twitter
       # @param response [HTTP::Response]
       # @return [Twitter::Error]
       def from_response(response)
-        message, code = parse_error(symbolize_keys(response.parse))
+        message, code = parse_error(symbolize_keys!(response.parse))
         new(message, response.headers, code)
       end
 

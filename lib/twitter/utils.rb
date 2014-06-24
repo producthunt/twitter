@@ -17,21 +17,17 @@ module Twitter
 
   private
 
-    def symbolize_keys(object)
+    def symbolize_keys!(object)
       if object.is_a?(Array)
-        object.inject([]) do |result, val|
-          result << symbolize_keys(val)
-          result
+        object.each_with_index do |val, index|
+          object[index] = symbolize_keys!(val)
         end
       elsif object.is_a?(Hash)
-        object.inject({}) do |result, (key, val)|
-          new_key = key.respond_to?(:to_sym) ? key.to_sym : key
-          result[new_key] = symbolize_keys(val)
-          result
+        object.keys.each do |key|
+          object[key.to_sym] = symbolize_keys!(object.delete(key))
         end
-      else
-        object
       end
+      object
     end
 
     # Returns a new array with the concatenated results of running block once for every element in enumerable.
