@@ -25,10 +25,19 @@ module Twitter
       @path = request.path
       @options = request.options
       @collection = []
+      # Note(Mike Coutermarsh): We expose the request here so that we can get at the rate_limit information
+      @request = request
       self.attrs = request.perform
     end
 
-  private
+    def rate_limit
+      @request.rate_limit
+    end
+
+    # @return [Boolean]
+    def last?
+      next_cursor.zero?
+    end
 
     # @return [Integer]
     def next_cursor
@@ -36,15 +45,12 @@ module Twitter
     end
     alias next next_cursor
 
-    # @return [Boolean]
-    def last?
-      next_cursor.zero?
-    end
+  private
 
     # @return [Hash]
     def fetch_next_page
-      response = Twitter::REST::Request.new(@client, @request_method, @path, @options.merge(cursor: next_cursor)).perform
-      self.attrs = response
+      @request = Twitter::REST::Request.new(@client, @request_method, @path, @options.merge(cursor: next_cursor))
+      self.attrs = @request.perform
     end
 
     # @param attrs [Hash]
